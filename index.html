@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <title>Every Frame, of Every Video. Ever.</title>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas width="3440" height="1440" id="can"></canvas>
+
+<script>
+var can = document.getElementById('can');
+var WIDTH = can.width;
+var HEIGHT = can.height;
+var COLORS = [];
+var ctx = document.getElementById('can').getContext('2d');
+console.log('This will take '+(256*256*256)+'^'+(WIDTH*HEIGHT)+' frames to complete.  You get about 60 frames per second.  Grab your popcorn!')
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+console.log('Starting to build array of potential colors. This will take a minute');
+for(var r = 0; r <= 255; r++){
+  for(var g = 0; g <= 255; g++){
+    for(var b = 0; b <= 255; b++){
+      COLORS.push('#' + componentToHex(r) + componentToHex(g) + componentToHex(b));
+    }
+  }
+}
+console.log('Done building colors.');
+
+
+//COLORS.push('#000000');
+//COLORS.push('#AAAAAA');
+var MAX_COLOR_INDEX = COLORS.length-1;
+var pixels = [];
+
+
+var pixel = function(x, y, colorIndex, countIndex){
+  this.x = x;
+  this.y = y;
+  this.colorIndex = colorIndex || 0;
+  this.countIndex = countIndex || 0;
+
+}
+
+pixel.prototype.increment =  function(c){
+
+  if(this.countIndex != 0){
+    if(pixels[this.countIndex-1].increment()){
+      if(this.colorIndex == COLORS.length-1){
+        ctx.fillStyle = COLORS[this.colorIndex];
+        ctx.fillRect(this.x, this.y, 1, 1);
+        this.colorIndex = 0;
+        return true;
+      } else {
+        ctx.fillStyle = COLORS[this.colorIndex];
+        ctx.fillRect(this.x, this.y, 1, 1);
+        this.colorIndex++;
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    if(this.colorIndex == COLORS.length-1){
+      ctx.fillStyle = COLORS[this.colorIndex];
+      ctx.fillRect(this.x, this.y, 1, 1);
+      this.colorIndex = 0;
+      return true;
+    } else {
+      ctx.fillStyle = COLORS[this.colorIndex];
+      ctx.fillRect(this.x, this.y, 1, 1);
+      this.colorIndex++;
+      return false;
+    }
+  }
+}
+
+
+var COUNTER = 0;
+
+for(var i = 1; i<=HEIGHT; i++){
+  for(var n = 1; n<=WIDTH; n++){
+      pixels.push(new pixel(n, i, 0, COUNTER) );
+      COUNTER++
+  }
+}
+
+COUNTER = 0;
+var UPDATING = false;
+function main(){
+    if(pixels[COUNTER].increment()){
+      COUNTER++;
+    }
+    if(COUNTER == pixels.length){
+      COUNTER=0;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0,x,WIDTH,HEIGHT);
+      console.log('You hit the end, hurray!');
+    }
+  //  console.log(COUNTER);
+  requestAnimationFrame(main);
+}
+
+main()
+
+</script>
+
+</body>
+</html>
